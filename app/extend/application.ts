@@ -1,6 +1,7 @@
 import { Context } from 'egg';
 import * as redis from 'redis';
 import { parseString } from 'xml2js';
+import config from '../config';
 const MYREDIS = Symbol('Application#myRedis');
 
 export default {
@@ -53,7 +54,9 @@ interface RedisClient {
 class RedisClientClass {
     redis: redis.RedisClient;
     constructor() {
-        this.redis = redis.createClient(6379, '127.0.0.1');
+        this.redis = redis.createClient(config.redisPort, config.redisHost, {
+            password: config.redisPassword,
+        });
     }
     get(key: string): Promise<string> {
         return new Promise((resolve, reject) => {

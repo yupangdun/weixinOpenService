@@ -1,11 +1,14 @@
-# hackernews-async-ts
+# 微信第三放开放平台发布验证
 
-[Hacker News](https://news.ycombinator.com/) showcase using typescript && egg
+Node.js版本微信第三放开放平台发布验证，使用egg+redis组合
 
 ## QuickStart
 
 ### Development
 
+1.setting: `config/index.ts`
+
+2.bash run:
 ```bash
 $ npm i
 $ npm run dev

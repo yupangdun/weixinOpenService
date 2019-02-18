@@ -5,6 +5,9 @@ export default {
   msgSignature: '',
   encodingAESKey: '',
   appsecret: '',
+  redisHost: '127.0.0.1',
+  redisPort: 6379,
+  redisPassword: '',
 
   api_component_token_url: 'https://api.weixin.qq.com/cgi-bin/component/api_component_token',
   api_create_preauthcode_url: 'https://api.weixin.qq.com/cgi-bin/component/api_create_preauthcode',
