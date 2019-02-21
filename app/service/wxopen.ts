@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { Service } from 'egg';
 import config from '../config';
+import { QRCodeQuery, CreateQRCodeBody, actionName } from '../interface/wxopen';
+
 
 export default class WxOpenService extends Service {
 
@@ -124,4 +126,57 @@ export default class WxOpenService extends Service {
     const authorizerAccessToken = await this.getAuthorizerAccessToken();
     return await axios.post(`${config.api_send_custom_message_url}?access_token=${authorizerAccessToken}`, body);
   }
-};
+
+  public async postCreateQRCode(query: QRCodeQuery) {
+    let body: CreateQRCodeBody;
+    switch (query.action_name) {
+      case actionName.QR_SCENE:
+        body = {
+          expire_seconds: query.expire_seconds || 60,
+          action_name: query.action_name,
+          action_info:
+          {
+            scene: { scene_id: query.scene as number },
+          },
+        }; break;
+      case actionName.QR_STR_SCENE:
+        body = {
+          expire_seconds: query.expire_seconds || 60,
+          action_name: query.action_name,
+          action_info:
+          {
+            scene: { scene_str: query.scene as string },
+          },
+        }; break;
+      case actionName.QR_LIMIT_SCENE:
+        body = {
+          action_name: query.action_name,
+          action_info:
+          {
+            scene: { scene_id: query.scene as number },
+          },
+        }; break;
+      case actionName.QR_LIMIT_STR_SCENE:
+        body = {
+          expire_seconds: query.expire_seconds || 60,
+          action_name: query.action_name,
+          action_info:
+          {
+            scene: { scene_str: query.scene as string },
+          },
+        }; break;
+      default:
+        body = {
+          action_name: actionName.QR_SCENE,
+          action_info: {
+            scene: {
+              scene_id: 1,
+            },
+          },
+        };
+    }
+    const authorizerAccessToken = await this.getAuthorizerAccessToken();
+    return await axios.post(`${config.api_create_qrcode_url}?access_token=${authorizerAccessToken}`, body);
+
+  }
+}

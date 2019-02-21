@@ -124,6 +124,11 @@ export default class WxOpenController extends Controller {
         ctx.body = ctx.service.aes.encrypt(str);
     }
 
+    public async createQRCode() {
+        const { ctx } = this;
+        ctx.body = await ctx.service.wxopen.postCreateQRCode(ctx.request.query);
+    }
+
     public async testRedis() {
         const { ctx, app } = this;
         await app.myRedis.set('test', 'redis is ok!');
