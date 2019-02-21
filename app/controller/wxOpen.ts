@@ -126,8 +126,8 @@ export default class WxOpenController extends Controller {
 
     public async testRedis() {
         const { ctx, app } = this;
-        await app.myRedis.set('foo', '1231');
-        const res = await app.myRedis.get('foo');
+        await app.myRedis.set('test', 'redis is ok!');
+        const res = await app.myRedis.get('test');
         ctx.body = res;
     }
 }

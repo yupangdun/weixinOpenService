@@ -7,7 +7,7 @@
     "typescript": true
   },
   "scripts": {
-    "start": "egg-scripts start --daemon --title=egg-server-service --port 80",
+    "start": "egg-scripts start --daemon --title=egg-server-service",
     "stop": "egg-scripts stop --title=egg-server-service",
     "dev": "egg-bin dev -r egg-ts-helper/register --port 80",
     "debug": "egg-bin debug -r egg-ts-helper/register --port 80",
