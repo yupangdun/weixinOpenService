@@ -61,56 +61,18 @@ export default class WxOpenController extends Controller {
 
     public async postEventMessage() {
         const { app, ctx } = this;
-        const res = await app.xml2json(ctx);
-
-        const timeStamp = new Date().getTime();
+        const request = await app.xml2json(ctx);
         ctx.response.set('Content-Type', 'text/xml');
-        let str = '';
-
-        if (res.xml.MsgType === 'text' && res.xml.Content === 'TESTCOMPONENT_MSG_TYPE_TEXT') {
-
-            /**
-             * 1、模拟粉丝发送文本消息给专用测试公众号，第三方平台方需根据文本消息的内容进行相应的响应：
-             *
-             * 1）微信模推送给第三方平台方：文本消息，其中Content字段的内容固定为：TESTCOMPONENT_MSG_TYPE_TEXT
-             *
-             *  2）第三方平台方立马回应文本消息并最终触达粉丝：Content必须固定为：TESTCOMPONENT_MSG_TYPE_TEXT_callback
-             */
-
-            // tslint:disable-next-line:max-line-length
-            str = `<xml><ToUserName><![CDATA[${res.xml.FromUserName}]]></ToUserName><FromUserName><![CDATA[${res.xml.ToUserName}]]></FromUserName><CreateTime>${timeStamp}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[TESTCOMPONENT_MSG_TYPE_TEXT_callback]]></Content><MsgId>${res.xml.MsgId}</MsgId></xml>`;
-        } else if (res.xml.MsgType === 'text' && res.xml.Content.indexOf('QUERY_AUTH_CODE:') > -1) {
-
-            /**
-             * 2、模拟粉丝发送文本消息给专用测试公众号，第三方平台方需在5秒内返回空串表明暂时不回复，然后再立即使用客服消息接口发送消息回复粉丝
-             *
-             * 1）微信模推送给第三方平台方：文本消息，其中Content字段的内容固定为： QUERY_AUTH_CODE:$query_auth_code$（query_auth_code
-             * 会在专用测试公众号自动授权给第三方平台方时，由微信后台推送给开发者）
-             *
-             * 2）第三方平台方拿到$query_auth_code$的值后，通过接口文档页中的“使用授权码换取公众号的授权信息”API，将$query_auth_code$的值赋值
-             * 给API所需的参数authorization_code。然后，调用发送客服消息api回复文本消息给粉丝，其中文本消息的content字段设为：$query_auth_code$_from_api
-             * （其中$query_auth_code$需要替换成推送过来的query_auth_code）
-             */
-
-            ctx.body = '';
-            const queryAuthCode = res.xml.Content.replace('QUERY_AUTH_CODE:', '');
-            await ctx.service.wxopen.postApiQueryAuth(queryAuthCode);
-            await ctx.service.wxopen.postSendCustomMessage({
-                touser: res.xml.FromUserName,
-                msgtype: 'text',
-                text: {
-                    content: `${queryAuthCode}_from_api`,
-                },
-            });
-            return;
-        } else {
-            // tslint:disable-next-line:max-line-length
-            str = `<xml><ToUserName><![CDATA[${res.xml.FromUserName}]]></ToUserName><FromUserName><![CDATA[${res.xml.ToUserName}]]></FromUserName><CreateTime>${timeStamp}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[微信第三方开发平台：${res.xml.Content}]]></Content><MsgId>${res.xml.MsgId}</MsgId></xml>`;
-        }
-        ctx.body = ctx.service.aes.encrypt(str);
+        const response = await ctx.service.wxopen.postEventMessage(request.xml);
+        ctx.body = response && ctx.service.aes.encrypt(response);
     }
 
-    public async createQRCode() {
+    public async createQRCodeImage() {
+        const { ctx } = this;
+        ctx.body = await ctx.service.wxopen.postCreateQRCode(ctx.request.query, false);
+    }
+
+    public async createQRCodeUrl() {
         const { ctx } = this;
         ctx.body = await ctx.service.wxopen.postCreateQRCode(ctx.request.query);
     }

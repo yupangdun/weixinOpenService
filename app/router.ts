@@ -14,5 +14,9 @@ export default (app: Application) => {
 
   router.post('/wxopen/:appid/callback', controller.wxopen.postEventMessage);
 
+  router.get('/wxopen/getQRCodeImage', controller.wxopen.createQRCodeImage);
+
+  router.get('/wxopen/getQRCodeUrl', controller.wxopen.createQRCodeUrl);
+
   router.get('/test', controller.wxopen.testRedis);
 };

@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { Service } from 'egg';
 import config from '../config';
-import { actionName, CreateQRCodeBody, QRCodeQuery } from '../model/wxopen';
+import { EventKey, messageConfigs } from '../config/message';
+import { ActionName, CreateQRCodeBody, EventType, QRCodeQuery } from '../model/wxopen';
 
 export default class WxOpenService extends Service {
 
@@ -126,10 +127,10 @@ export default class WxOpenService extends Service {
     return await axios.post(`${config.api_send_custom_message_url}?access_token=${authorizerAccessToken}`, body);
   }
 
-  public async postCreateQRCode(query: QRCodeQuery) {
+  public async postCreateQRCode(query: QRCodeQuery, isUrl: boolean = true) {
     let body: CreateQRCodeBody;
     switch (query.action_name) {
-      case actionName.QR_SCENE:
+      case ActionName.QR_SCENE:
         body = {
           expire_seconds: query.expire_seconds || 60,
           action_name: query.action_name,
@@ -138,7 +139,7 @@ export default class WxOpenService extends Service {
             scene: { scene_id: query.scene as number },
           },
         }; break;
-      case actionName.QR_STR_SCENE:
+      case ActionName.QR_STR_SCENE:
         body = {
           expire_seconds: query.expire_seconds || 60,
           action_name: query.action_name,
@@ -147,7 +148,7 @@ export default class WxOpenService extends Service {
             scene: { scene_str: query.scene as string },
           },
         }; break;
-      case actionName.QR_LIMIT_SCENE:
+      case ActionName.QR_LIMIT_SCENE:
         body = {
           action_name: query.action_name,
           action_info:
@@ -155,7 +156,7 @@ export default class WxOpenService extends Service {
             scene: { scene_id: query.scene as number },
           },
         }; break;
-      case actionName.QR_LIMIT_STR_SCENE:
+      case ActionName.QR_LIMIT_STR_SCENE:
         body = {
           expire_seconds: query.expire_seconds || 60,
           action_name: query.action_name,
@@ -166,7 +167,7 @@ export default class WxOpenService extends Service {
         }; break;
       default:
         body = {
-          action_name: actionName.QR_SCENE,
+          action_name: ActionName.QR_SCENE,
           action_info: {
             scene: {
               scene_id: 1,
@@ -175,7 +176,67 @@ export default class WxOpenService extends Service {
         };
     }
     const authorizerAccessToken = await this.getAuthorizerAccessToken();
-    return await axios.post(`${config.api_create_qrcode_url}?access_token=${authorizerAccessToken}`, body);
+    const res = await axios.post(`${config.api_create_qrcode_url}?access_token=${authorizerAccessToken}`, body);
+    if (isUrl) {
+      return res.data;
+    } else {
+      const response = await axios.get(`${config.api_show_qrcode_url}?ticket=${encodeURI(res.data.ticket)}`);
+      return response.data;
+    }
+  }
 
+  public async postEventMessage(request: any) {
+    const timeStamp = new Date().getTime();
+    if (request.MsgType === 'text' && request.Content === 'TESTCOMPONENT_MSG_TYPE_TEXT') {
+
+      /**
+       * 1、模拟粉丝发送文本消息给专用测试公众号，第三方平台方需根据文本消息的内容进行相应的响应：
+       *
+       * 1）微信模推送给第三方平台方：文本消息，其中Content字段的内容固定为：TESTCOMPONENT_MSG_TYPE_TEXT
+       *
+       *  2）第三方平台方立马回应文本消息并最终触达粉丝：Content必须固定为：TESTCOMPONENT_MSG_TYPE_TEXT_callback
+       */
+
+      // tslint:disable-next-line:max-line-length
+      return `<xml><ToUserName><![CDATA[${request.FromUserName}]]></ToUserName><FromUserName><![CDATA[${request.ToUserName}]]></FromUserName><CreateTime>${timeStamp}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[TESTCOMPONENT_MSG_TYPE_TEXT_callback]]></Content><MsgId>${request.MsgId}</MsgId></xml>`;
+    } else if (request.MsgType === 'text' && request.Content.indexOf('QUERY_AUTH_CODE:') > -1) {
+
+      /**
+       * 2、模拟粉丝发送文本消息给专用测试公众号，第三方平台方需在5秒内返回空串表明暂时不回复，然后再立即使用客服消息接口发送消息回复粉丝
+       *
+       * 1）微信模推送给第三方平台方：文本消息，其中Content字段的内容固定为： QUERY_AUTH_CODE:$query_auth_code$（query_auth_code
+       * 会在专用测试公众号自动授权给第三方平台方时，由微信后台推送给开发者）
+       *
+       * 2）第三方平台方拿到$query_auth_code$的值后，通过接口文档页中的“使用授权码换取公众号的授权信息”API，将$query_auth_code$的值赋值
+       * 给API所需的参数authorization_code。然后，调用发送客服消息api回复文本消息给粉丝，其中文本消息的content字段设为：$query_auth_code$_from_api
+       * （其中$query_auth_code$需要替换成推送过来的query_auth_code）
+       */
+
+      this.ctx.body = '';
+      const queryAuthCode = request.Content.replace('QUERY_AUTH_CODE:', '');
+      await this.postApiQueryAuth(queryAuthCode);
+      await this.postSendCustomMessage({
+        touser: request.FromUserName,
+        msgtype: 'text',
+        text: {
+          content: `${queryAuthCode}_from_api`,
+        },
+      });
+      return;
+    } else if (request.Event === EventType.scan || request.Event === EventType.subscribe) {
+      // 返回一条图文消息
+      switch (request.EventKey) {
+        case EventKey.GEZHIXUAN:
+          const messageConfig = messageConfigs[EventKey.GEZHIXUAN];
+          // tslint:disable-next-line:max-line-length
+          return `<xml><ToUserName><![CDATA[${request.FromUserName}]]></ToUserName><FromUserName><![CDATA[${request.ToUserName}]]></FromUserName><CreateTime>${timeStamp}</CreateTime><MsgType><![CDATA[${messageConfig.MsgType}]]></MsgType><ArticleCount>${messageConfig.ArticleCount}</ArticleCount><Articles><item><Title><![CDATA[${messageConfig.Title}]]></Title><Description><![CDATA[${messageConfig.Description}]]></Description><PicUrl><![CDATA[${messageConfig.PicUrl}]]></PicUrl><Url><![CDATA[${messageConfig.Url}]]></Url></item></Articles></xml>`;
+        default: return this.ctx.body = 'success';
+      }
+    } else {
+      this.ctx.body = 'success';
+      return;
+      // tslint:disable-next-line:max-line-length
+      // str = `<xml><ToUserName><![CDATA[${res.xml.FromUserName}]]></ToUserName><FromUserName><![CDATA[${res.xml.ToUserName}]]></FromUserName><CreateTime>${timeStamp}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[微信第三方开发平台：${res.xml.Content}]]></Content><MsgId>${res.xml.MsgId}</MsgId></xml>`;
+    }
   }
 }

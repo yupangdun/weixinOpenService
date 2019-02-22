@@ -7,7 +7,7 @@
  */
 export interface QRCodeQuery {
   expire_seconds?: number;
-  action_name?: actionName;
+  action_name?: ActionName;
   scene?: string | number;
 }
 
@@ -32,7 +32,7 @@ interface Scene {
   scene_str?: string;
 }
 
-export enum actionName {
+export enum ActionName {
   QR_SCENE = 'QR_SCENE', // 临时的整型参数值
   QR_STR_SCENE = 'QR_STR_SCENE', // 临时的字符串参数值
   QR_LIMIT_SCENE = 'QR_LIMIT_SCENE', // 永久的整型参数值
@@ -48,4 +48,15 @@ export enum actionName {
 export interface RedisClient {
   get(key: string): Promise<string>;
   set(key: string, value: string, seconds?: number): Promise<string>;
+}
+
+/**
+ * 扫描二维码返回的事件类型枚举
+ *
+ * @export
+ * @enum {number}
+ */
+export enum EventType {
+  subscribe = 'subscribe', // 用户未关注时扫描二维码返回的事件类型
+  scan = 'SCAN', // 用户已关注后扫描二维码返回的事件类型
 }
