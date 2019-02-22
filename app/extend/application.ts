@@ -2,6 +2,7 @@ import { Context } from 'egg';
 import * as redis from 'redis';
 import { parseString } from 'xml2js';
 import config from '../config';
+import { RedisClient } from '../model/wxopen';
 const MYREDIS = Symbol('Application#myRedis');
 
 export default {
@@ -44,11 +45,6 @@ export default {
             });
         });
     },
-};
-
-interface RedisClient {
-    get(key: string): Promise<string>;
-    set(key: string, value: string, seconds?: number): Promise<string>;
 };
 
 class RedisClientClass {

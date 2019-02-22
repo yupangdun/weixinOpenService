@@ -38,3 +38,14 @@ export enum actionName {
   QR_LIMIT_SCENE = 'QR_LIMIT_SCENE', // 永久的整型参数值
   QR_LIMIT_STR_SCENE = 'QR_LIMIT_STR_SCENE', // 永久的字符串参数值
 }
+
+/**
+ * redis
+ *
+ * @export
+ * @interface RedisClient
+ */
+export interface RedisClient {
+  get(key: string): Promise<string>;
+  set(key: string, value: string, seconds?: number): Promise<string>;
+}
