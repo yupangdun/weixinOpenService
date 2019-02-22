@@ -50,20 +50,6 @@ export default class WxOpenController extends Controller {
     }
 
     /**
-     * 将加密ticket 解密出来
-     *
-     * @memberof WxOpenController
-     */
-    public async getTickt() {
-        const { ctx } = this;
-        // tslint:disable-next-line:max-line-length
-        const encrypt = `4NL+fHzQu1ZCnqw5uHQ+CZWvrOmTbsux1rPSxjJoXZzLE7/BLfmbU+OU/C9whyJraDzQf9lWlpfveVc4afizAbDVzotdt6F+SHijvnl50VAm8HcWsql0/CSH6yAv6judwCVxc49+/RbJM72bkyUe9Cgy9DZlTjqd0+5GPHAeYCKis4qOyHLZNmjL+19oM+0jxekqVvEhfYDfKZJoqQdq6Adk6mU+6tfVasRj2ZM0PAJW7MweTPHCfqw3SyUp4LpsFEoq1coEqmJTOzT/GIIiSVuVlc3wX9bswJufQG7U0+pZKz6j6DkI/0WEYphllA1cJrlrGOlAXxo6PlL2bb+TVjGZ76PiRoFALmFYRRZRBp35C6RNexRHNLbBBgAknAkBiTBIqw0aWBFw/i8SkRfqxTc5VupE0SG+FvO4UI4cpp8v1MOPwMd6uKZ5ZN79Ne9flBpjU+RETfWoM5LFbgmTsA==`;
-        const res = ctx.service.aes.decrypt(encrypt);
-        ctx.response.set('Content-Type', 'text/xml');
-        ctx.body = res;
-    }
-
-    /**
      *  获取预授权码
      *
      * @memberof WxOpenController
@@ -73,7 +59,7 @@ export default class WxOpenController extends Controller {
         ctx.body = await ctx.service.wxopen.postCreatePreauthcode();
     }
 
-    public async postMessage() {
+    public async postEventMessage() {
         const { app, ctx } = this;
         const res = await app.xml2json(ctx);
 

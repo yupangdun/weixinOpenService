@@ -2,10 +2,10 @@
 // Do not modify this file!!!!!!!!!
 
 import 'egg';
-import ExportWxopen from '../../../app/controller/wxopen';
+import ExportWxopen from '../../../app/model/wxopen';
 
 declare module 'egg' {
-  interface IController {
-    wxopen: ExportWxopen;
+  interface IModel {
+    Wxopen: ReturnType<typeof ExportWxopen>;
   }
 }

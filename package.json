@@ -9,8 +9,8 @@
   "scripts": {
     "start": "egg-scripts start --daemon --title=egg-server-service",
     "stop": "egg-scripts stop --title=egg-server-service",
-    "dev": "egg-bin dev -r egg-ts-helper/register --port 80",
-    "debug": "egg-bin debug -r egg-ts-helper/register --port 80",
+    "dev": "egg-bin dev -r egg-ts-helper/register",
+    "debug": "egg-bin debug -r egg-ts-helper/register",
     "test-local": "egg-bin test -r egg-ts-helper/register",
     "test": "npm run lint -- --fix && npm run test-local",
     "cov": "egg-bin cov -r egg-ts-helper/register",

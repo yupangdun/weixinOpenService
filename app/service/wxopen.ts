@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { Service } from 'egg';
 import config from '../config';
-import { QRCodeQuery, CreateQRCodeBody, actionName } from '../model/wxopen';
-
+import { actionName, CreateQRCodeBody, QRCodeQuery } from '../model/wxopen';
 
 export default class WxOpenService extends Service {
 
