@@ -181,6 +181,7 @@ export default class WxOpenService extends Service {
       return res.data;
     } else {
       const response = await axios.get(`${config.api_show_qrcode_url}?ticket=${encodeURI(res.data.ticket)}`);
+      this.ctx.response.set('Content-Type', response.headers['content-type']);
       return response.data;
     }
   }
@@ -225,15 +226,14 @@ export default class WxOpenService extends Service {
       return;
     } else if (request.Event === EventType.scan || request.Event === EventType.subscribe) {
       // 返回一条图文消息
-      switch (request.EventKey) {
-        case EventKey.GEZHIXUAN:
-          const messageConfig = messageConfigs[EventKey.GEZHIXUAN];
+      switch (request.EventKey.toString()) {
+        case EventKey.GEZHIXUAN.toString():
+          const messageConfig = messageConfigs[EventKey.GEZHIXUAN - 1];
           // tslint:disable-next-line:max-line-length
           return `<xml><ToUserName><![CDATA[${request.FromUserName}]]></ToUserName><FromUserName><![CDATA[${request.ToUserName}]]></FromUserName><CreateTime>${timeStamp}</CreateTime><MsgType><![CDATA[${messageConfig.MsgType}]]></MsgType><ArticleCount>${messageConfig.ArticleCount}</ArticleCount><Articles><item><Title><![CDATA[${messageConfig.Title}]]></Title><Description><![CDATA[${messageConfig.Description}]]></Description><PicUrl><![CDATA[${messageConfig.PicUrl}]]></PicUrl><Url><![CDATA[${messageConfig.Url}]]></Url></item></Articles></xml>`;
-        default: return this.ctx.body = 'success';
+        default: return;
       }
     } else {
-      this.ctx.body = 'success';
       return;
       // tslint:disable-next-line:max-line-length
       // str = `<xml><ToUserName><![CDATA[${res.xml.FromUserName}]]></ToUserName><FromUserName><![CDATA[${res.xml.ToUserName}]]></FromUserName><CreateTime>${timeStamp}</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[微信第三方开发平台：${res.xml.Content}]]></Content><MsgId>${res.xml.MsgId}</MsgId></xml>`;

@@ -64,7 +64,7 @@ export default class WxOpenController extends Controller {
         const request = await app.xml2json(ctx);
         ctx.response.set('Content-Type', 'text/xml');
         const response = await ctx.service.wxopen.postEventMessage(request.xml);
-        ctx.body = response && ctx.service.aes.encrypt(response);
+        ctx.body = response && ctx.service.aes.encrypt(response) || 'success';
     }
 
     public async createQRCodeImage() {
