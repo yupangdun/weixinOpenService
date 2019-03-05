@@ -226,9 +226,17 @@ export default class WxOpenService extends Service {
       return;
     } else if (request.Event === EventType.scan || request.Event === EventType.subscribe) {
       // 返回一条图文消息
-      switch (request.EventKey.toString()) {
-        case EventKey.GEZHIXUAN.toString():
-          const messageConfig = messageConfigs[EventKey.GEZHIXUAN - 1];
+      const eventKey = request.Event === EventType.scan ?
+        request.EventKey.toString() :
+        request.EventKey.replace('qrscene_', '');
+      let messageConfig;
+      switch (eventKey) {
+        case EventKey.GEZHIXUANF.toString():
+          messageConfig = messageConfigs[0];
+          // tslint:disable-next-line:max-line-length
+          return `<xml><ToUserName><![CDATA[${request.FromUserName}]]></ToUserName><FromUserName><![CDATA[${request.ToUserName}]]></FromUserName><CreateTime>${timeStamp}</CreateTime><MsgType><![CDATA[${messageConfig.MsgType}]]></MsgType><ArticleCount>${messageConfig.ArticleCount}</ArticleCount><Articles><item><Title><![CDATA[${messageConfig.Title}]]></Title><Description><![CDATA[${messageConfig.Description}]]></Description><PicUrl><![CDATA[${messageConfig.PicUrl}]]></PicUrl><Url><![CDATA[${messageConfig.Url}]]></Url></item></Articles></xml>`;
+        case EventKey.GEZHIXUANM.toString():
+          messageConfig = messageConfigs[1];
           // tslint:disable-next-line:max-line-length
           return `<xml><ToUserName><![CDATA[${request.FromUserName}]]></ToUserName><FromUserName><![CDATA[${request.ToUserName}]]></FromUserName><CreateTime>${timeStamp}</CreateTime><MsgType><![CDATA[${messageConfig.MsgType}]]></MsgType><ArticleCount>${messageConfig.ArticleCount}</ArticleCount><Articles><item><Title><![CDATA[${messageConfig.Title}]]></Title><Description><![CDATA[${messageConfig.Description}]]></Description><PicUrl><![CDATA[${messageConfig.PicUrl}]]></PicUrl><Url><![CDATA[${messageConfig.Url}]]></Url></item></Articles></xml>`;
         default: return;
