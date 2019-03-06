@@ -80,6 +80,11 @@ export default class WxOpenService extends Service {
     await app.myRedis.set('AuthorizerAppid', authorizer_appid);
     await app.myRedis.set('AuthorizerAccessToken', authorizer_access_token, expires_in - 600);
     await app.myRedis.set('AuthorizerRefreshToken', authorizer_refresh_token);
+    await this.app.mysql.insert('apptoken', {
+      app_id: authorizer_appid,
+      refresh_token: authorizer_refresh_token,
+      create_time: new Date(),
+    });
 
     return res.data;
   }
@@ -109,6 +114,8 @@ export default class WxOpenService extends Service {
         const { authorizer_access_token, authorizer_refresh_token, expires_in } = res.data;
         await app.myRedis.set('AuthorizerAccessToken', authorizer_access_token, expires_in - 600);
         await app.myRedis.set('AuthorizerRefreshToken', authorizer_refresh_token);
+        await this.app.mysql.query(`UPDATE apptoken SET refresh_token = ?,create_time = ? WHERE refresh_token = ?`,
+          [authorizerAccessToken, new Date(), authorizer_access_token]);
         authorizerAccessToken = authorizer_access_token;
       }
     }
@@ -188,6 +195,14 @@ export default class WxOpenService extends Service {
 
   public async postEventMessage(request: any) {
     const timeStamp = new Date().getTime();
+    //  记录事件
+    await this.app.mysql.insert('event', {
+      from_user_name: request.FromUserName,
+      type: request.Event,
+      value: request.EventKey,
+      create_time: new Date(),
+    });
+
     if (request.MsgType === 'text' && request.Content === 'TESTCOMPONENT_MSG_TYPE_TEXT') {
 
       /**

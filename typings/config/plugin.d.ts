@@ -2,4 +2,5 @@
 // Do not modify this file!!!!!!!!!
 
 import 'egg';
+import 'egg-mysql';
 import 'egg-cors';

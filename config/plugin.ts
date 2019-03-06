@@ -10,6 +10,10 @@ const plugin: EggPlugin = {
   //   enable: true,
   //   package: 'egg-redis',
   // },
+  mysql: {
+    enable: true,
+    package: 'egg-mysql',
+  },
   cors: {
     enable: true,
     package: 'egg-cors',
