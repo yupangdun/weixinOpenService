@@ -18,8 +18,12 @@ $ open http://localhost:80/
 Don't tsc compile at development mode, if you had run `tsc` then you need to `npm run clean` before `npm run dev`.
 
 ### Deploy
-
+1. install & run redis-server (prot:6379)
+2. install & run mysql (prot:3306)
+3. install node
+4. bash:
 ```bash
+$ npm i 
 $ npm run tsc
 $ npm start
 ```

@@ -8,8 +8,8 @@
 // }];
 
 export enum EventKey {
-  GEZHIXUANF = 1,
-  GEZHIXUANM = 2,
+  GEZHIXUANF = 'imprexion_f',
+  GEZHIXUANM = 'imprexion_m',
 }
 export const messageConfigs = [{
   MsgType: 'news',
